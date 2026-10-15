@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#000000">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" 
+content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="PICA">
+<title>PICA Sesli Asistan</title>
+
+<!-- PWA Manifest Entegrasyonu -->
+<link rel="manifest" href="data:application/manifest+json;charset=utf-8,%7B%22name%22%3A%22PICA%20Sesli%20Asistan%22%2C%22short_name%22%3A%22PICA%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23000000%22%2C%22theme_color%22%3A%22%23000000%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22data%3Aimage%2Fsvg%2Bxml%2C%253Csvg%2520xmlns%253D%2527http%253A%252F%252Fwww.w3.org%252F2000%252Fsvg%2527%2520viewBox%253D%25270%25200%2520512%2520512%2527%253E%253Ccircle%2520cx%253D%2527256%2527%2520cy%253D%2527256%2527%2520r%253D%2527256%2527%2520fill%253D%2527%2523000%2527%252F%253E%253Ccircle%2520cx%253D%2527256%2527%2520cy%253D%2527256%2527%2520r%253D%2527180%2527%2520fill%253D%2527url(%2523g)%2527%252F%253E%253Cdefs%253E%253CradialGradient%2520id%253D%2527g%2527%253E%253Cstop%2520offset%253D%25270%2525%2527%2520stop-color%253D%2527%2523fff6e6%2527%252F%253E%253Cstop%2520offset%253D%252740%2525%2527%2520stop-color%253D%2527%2523e8b873%2527%252F%253E%253Cstop%2520offset%253D%2527100%2525%2527%2520stop-color%253D%2527%25232a1a0b%2527%252F%253E%253C%252FradialGradient%253E%253C%252Fdefs%253E%253C%252Fsvg%253E%22%2C%22sizes%22%3A%22512x512%22%2C%22type%22%3A%22image%2Fsvg%2Bxml%22%7D%5D%7D">
+
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&family=Manrope:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  --bg: #000000;
+  --panel: #0f0f11;
+  --panel2: #16161a;
+  --line: #26262b;
+  --ink: #f3efe8;
+  --muted: #8d8981;
+  --gold: #e8b873;
+  --gold2: #b8854b;
+  --dark-ink: #16100a;
+  color-scheme: dark;
+  box-sizing: border-box;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+*, *::before, *::after { box-sizing: inherit; -webkit-tap-highlight-color: transparent; }
+html, body { height: 100%; margin: 0; padding: 0; overflow: hidden; background: #000; user-select: none; }
+body {
+  background: radial-gradient(120% 60% at 50% -10%, #1d1710 0%, #000 60%);
+  color: var(--ink);
+  font: 400 16px/1.5 'Manrope', system-ui, -apple-system, sans-serif;
+}
+
+.app {
+  height: 100%;
+  max-width: 780px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+}
+
+header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px 8px;
+}
+
+.orb {
+  border-radius: 50%;
+  background: radial-gradient(circle at 32% 28%, #fff6e6 0%, var(--gold) 30%, var(--gold2) 62%, #2a1a0b 100%);
+  position: relative;
+  flex: none;
+  box-shadow: 0 0 28px rgba(232, 184, 115, 0.35);
+  transition: transform 0.3s ease;
+}
+.orb::before, .orb::after {
+  content: "";
+  position: absolute;
+  inset: -6px;
+  border-radius: 50%;
+  border: 1.5px solid var(--gold);
+  opacity: 0;
+}
+.sm { width: 44px; height: 44px; }
+
+.who { flex: 1; min-width: 0; }
+.who h1 { margin: 0; font: 700 22px/1 'Sora', sans-serif; letter-spacing: 3px; }
+.who p { margin: 4px 0 0; font-size: 12.5px; color: var(--muted); }
+
+.pill {
+  border: 1px solid var(--line);
+  background: var(--panel);
+  color: var(--ink);
+  border-radius: 999px;
+  padding: 8px 14px;
+  font: 600 13px 'Manrope', sans-serif;
+  cursor: pointer;
+}
+.pill:active { border-color: var(--gold); color: var(--gold); }
+
+.chips {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 8px 16px 12px;
+  scrollbar-width: none;
+}
+.chips::-webkit-scrollbar { display: none; }
+.chip {
+  flex: none;
+  border: 1px solid var(--line);
+  background: var(--panel);
+  color: #d9d4ca;
+  border-radius: 14px;
+  padding: 9px 15px;
+  font: 500 14px 'Manrope', sans-serif;
+  cursor: pointer;
+}
+.chip:active { border-color: var(--gold); color: var(--gold); background: var(--panel2); }
+
+#chat {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px 16px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  -webkit-overflow-scrolling: touch;
+}
+
+.m { max-width: 86%; padding: 12px 16px; border-radius: 18px; animation: in .25s ease-out; }
+@keyframes in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+.ai { align-self: flex-start; background: var(--panel); border: 1px solid var(--line); border-top-left-radius: 4px; }
+.me { align-self: flex-end; background: linear-gradient(135deg, var(--gold), var(--gold2)); color: var(--dark-ink); font-weight: 500; border-top-right-radius: 4px; }
+.nm { display: block; font: 600 11px 'Sora', sans-serif; letter-spacing: 1.5px; color: var(--gold); margin-bottom: 3px; text-transform: uppercase; }
+
+a.btn {
+  display: inline-block;
+  margin: 10px 8px 0 0;
+  padding: 9px 16px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, var(--gold), var(--gold2));
+  color: var(--dark-ink);
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 14px;
+}
+a.btn.alt { background: transparent; color: var(--gold); border: 1px solid var(--gold2); }
+
+pre { margin: 10px 0 0; background: #000; border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; overflow-x: auto; font-size: 13px; color: var(--gold); }
+code.pw { background: #000; border: 1px solid var(--line); padding: 5px 11px; border-radius: 8px; font-size: 17px; letter-spacing: 1px; color: var(--gold); }
+.cp { margin-top: 8px; border: 1px solid var(--line); background: transparent; color: var(--muted); border-radius: 999px; padding: 4px 11px; font-size: 12px; cursor: pointer; }
+
+.dots span { display: inline-block; width: 7px; height: 7px; margin: 0 2px; border-radius: 50%; background: var(--gold); animation: b 1s infinite; }
+.dots span:nth-child(2) { animation-delay: .15s; }
+.dots span:nth-child(3) { animation-delay: .3s; }
+@keyframes b { 0%, 60%, 100% { transform: translateY(0); opacity: .35; } 30% { transform: translateY(-4px); opacity: 1; } }
+
+.bar {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin: 0 12px 12px;
+  padding: 6px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 24px;
+}
+.bar:focus-within { border-color: var(--gold2); }
+.bar input { flex: 1; min-width: 0; border: 0; background: transparent; color: var(--ink); font: 16px 'Manrope', sans-serif; padding: 8px 10px; outline: none; }
+.bar input::placeholder { color: var(--muted); }
+
+.ib {
+  width: 44px;
+  height: 44px;
+  border-radius: 18px;
+  border: 0;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  flex: none;
+  background: var(--panel2);
+  color: var(--ink);
+}
+#mic.on { background: var(--gold); color: var(--dark-ink); }
+#send { background: var(--ink); color: #000; }
+#vc { width: auto; padding: 0 14px; gap: 8px; display: flex; align-items: center; background: linear-gradient(135deg, var(--gold), var(--gold2)); color: var(--dark-ink); font: 700 13px 'Manrope', sans-serif; }
+
+svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+/* Durum Animasyonları */
+body[data-s=listen] .orb::before { border-color: #fff; animation: ring 1.3s ease-out infinite; }
+body[data-s=talk] .orb::before { animation: ring 1.5s ease-out infinite; }
+body[data-s=talk] .orb::after { animation: ring 1.5s ease-out .6s infinite; }
+body[data-s=think] .orb { animation: pulse 1s ease-in-out infinite; }
+@keyframes ring { 0% { transform: scale(.95); opacity: .8; } 100% { transform: scale(1.5); opacity: 0; } }
+@keyframes pulse { 50% { transform: scale(.9); filter: brightness(.8); } }
+
+/* Tam Ekran Sesli Sohbet */
+.ov {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  background: radial-gradient(90% 60% at 50% 35%, #241a0e 0%, #000 70%);
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  padding: calc(env(safe-area-inset-top, 0px) + 28px) 24px calc(env(safe-area-inset-bottom, 0px) + 28px);
+  text-align: center;
+}
+.ov.on { display: flex; }
+.big { width: min(52vw, 220px); height: min(52vw, 220px); margin-top: 6vh; cursor: pointer; }
+.big::before, .big::after { inset: -10px; }
+#vname { font: 600 13px 'Sora', sans-serif; letter-spacing: 3px; color: var(--gold); text-transform: uppercase; }
+#vstat { font: 600 22px 'Sora', sans-serif; margin: 6px 0 14px; }
+#cap { max-width: 560px; max-height: 30vh; overflow-y: auto; color: #cfc9be; font-size: 16px; }
+#cap b { display: block; color: var(--muted); font-weight: 500; font-size: 14px; margin-bottom: 8px; }
+.end { border: 0; border-radius: 999px; background: #2a1212; color: #ff8a80; border: 1px solid #5a2323; padding: 14px 34px; font: 700 15px 'Manrope', sans-serif; cursor: pointer; }
+
+/* Ses Seçim Menüsü */
+.sheet { position: fixed; inset: 0; z-index: 30; background: rgba(0,0,0,.7); display: none; align-items: flex-end; justify-content: center; }
+.sheet.on { display: flex; }
+.sp { width: 100%; max-width: 560px; background: var(--panel); border: 1px solid var(--line); border-radius: 24px 24px 0 0; padding: 20px 16px calc(env(safe-area-inset-bottom, 0px) + 18px); }
+.sp h2 { margin: 0 0 4px; font: 700 18px 'Sora', sans-serif; }
+.sp > p { margin: 0 0 14px; color: var(--muted); font-size: 13.5px; }
+.vc { display: flex; align-items: center; gap: 12px; width: 100%; text-align: left; padding: 12px; margin-bottom: 8px; background: var(--panel2); border: 1px solid var(--line); border-radius: 16px; color: var(--ink); cursor: pointer; font: inherit; }
+.vc.sel { border-color: var(--gold); }
+.vc .av { width: 38px; height: 38px; border-radius: 50%; display: grid; place-items: center; font: 700 16px 'Sora', sans-serif; color: var(--dark-ink); background: linear-gradient(135deg, var(--gold), var(--gold2)); }
+.vc b { display: block; font-family: 'Sora', sans-serif; }
+.vc small { color: var(--muted); }
+</style>
+</head>
+<body data-s="idle">
+
+<div class="app">
+  <header>
+    <div class="orb sm"></div>
+    <div class="who">
+      <h1>PICA</h1>
+      <p id="status">Seni dinlemeye hazır</p>
+    </div>
+    <button class="pill" id="vbtn">Ses ▾</button>
+  </header>
+
+  <div class="chips" id="chips"></div>
+
+  <div id="chat"></div>
+
+  <div class="bar">
+    <button class="ib" id="mic" aria-label="Sesle Yaz"><svg viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></button>
+    <input id="inp" placeholder="Pica'ya yaz…" autocomplete="off">
+    <button class="ib" id="vc" aria-label="Sesli Sohbet"><svg viewBox="0 0 24 24"><path d="M4 10v4M8 6v12M12 3v18M16 7v10M20 10v4"/></svg>Sesli sohbet</button>
+    <button class="ib" id="send" aria-label="Gönder"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+  </div>
+</div>
+
+<!-- Tam Ekran Canlı Sohbet -->
+<div class="ov" id="ov">
+  <div>
+    <div id="vname">Elif</div>
+    <div class="orb big" id="bigorb"></div>
+  </div>
+  <div>
+    <div id="vstat">Dinliyorum…</div>
+    <div id="cap"></div>
+  </div>
+  <button class="end" id="endv">Sohbeti bitir</button>
+</div>
+
+<!-- Ses Seçici BottomSheet -->
+<div class="sheet" id="sheet">
+  <div class="sp">
+    <h2>PICA'nın Ses Tonu</h2>
+    <p>Tercih ettiğiniz konuşma stilini seçebilirsiniz.</p>
+    <div id="vlist"></div>
+  </div>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const chat = $('chat'), inp =$('inp');
+let ttsOn = true, rec = null, listening = false, voiceMode = false, busy = false, pendingEnd = false, spk = 0, vIdx = 0, voices = [];
+
+/* Ses Tonları */
+const P = [
+ {n:'Elif', d:'Sıcak ve yumuşak', pitch:1.06, rate:.95, slot:0, hi:'Merhaba, ben Elif. Seninle sohbet etmeye hazırım.'},
+ {n:'Deniz', d:'Sakin ve dengeli', pitch:.97, rate:.89, slot:1, hi:'Selam, ben Deniz. Acele yok, rahat rahat konuşuruz.'},
+ {n:'Mert', d:'Derin ve güven veren', pitch:.82, rate:.93, slot:0, hi:'Selam, ben Mert. Ne konuşmak istersin?'},
+ {n:'Ada', d:'Enerjik ve neşeli', pitch:1.16, rate:1.04, slot:1, hi:'Heey, ben Ada! Bugün neler yapıyoruz?'}
+];
+
+function score(v){ const n = v.name.toLowerCase(); let s = 0; if(/natural|neural|online/.test(n))s+=5; if(/enhanced|premium/.test(n))s+=4; if(/google/.test(n))s+=3; return s; }
+function loadVoices(){ if(!('speechSynthesis' in window))return; voices = speechSynthesis.getVoices().filter(v=>(v.lang||'').toLowerCase().startsWith('tr')).sort((a,b)=>score(b)-score(a)); }
+if('speechSynthesis' in window){ speechSynthesis.onvoiceschanged = loadVoices; loadVoices(); }
+const cur = () => P[vIdx];
+function curVoice(){ return voices.length ? voices[cur().slot % voices.length] : null; }
+
+function renderList(){
+  $('vlist').innerHTML = '';
+  P.forEach((p, i) => {
+    const b = document.createElement('button');
+    b.className = 'vc' + (i === vIdx ? ' sel' : '');
+    b.innerHTML = `<span class="av">${p.n[0]}</span><span><b>${p.n}</b><small>${p.d}</small></span>`;
+    b.onclick = () => { vIdx = i; setVoiceUI(); renderList(); speak(p.hi); };
+    $('vlist').appendChild(b);
+  });
+}
+function setVoiceUI(){ $('vbtn').textContent = 'Ses ▾'; $('vname').textContent = cur().n; }
+$('vbtn').onclick = () => { renderList();$('sheet').classList.add('on'); };
+$('sheet').onclick = e => { if(e.target.id === 'sheet')$('sheet').classList.remove('on'); };
+
+/* Konuşma Durumları */
+function setState(s){
+  document.body.dataset.s = s;
+  $('status').textContent = {idle:'Seni dinlemeye hazır', listen:'Dinliyorum…', talk:'Konuşuyor…', think:'Düşünüyor…'}[s];
+  $('vstat').textContent = {idle:'Hazır', listen:'Dinliyorum…', talk:'Konuşuyor…', think:'Düşünüyorum…'}[s];
+}
+
+function finish(){
+  setState('idle');
+  if(pendingEnd){ pendingEnd = false; endVoice(); return; }
+  if(voiceMode){ busy = false; setTimeout(vListen, 250); }
+}
+
+function speak(text){
+  const id = ++spk;
+  if(!('speechSynthesis' in window) || (!ttsOn && !voiceMode)){ if(voiceMode) finish(); return; }
+  speechSynthesis.cancel();
+  const clean = text.replace(/<[^>]*>/g, ' ').replace(/\*+/g, '').replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/gu, '').replace(/\s+/g, ' ').trim();
+  const parts = clean.split(/(?<=[.!?…:])\s+/).filter(Boolean);
+  if(!parts.length){ finish(); return; }
+  const p = cur(), v = curVoice();
+  parts.forEach((s, i) => {
+    const u = new SpeechSynthesisUtterance(s);
+    u.lang = 'tr-TR';
+    if(v) u.voice = v;
+    u.rate = p.rate + (Math.random() - .5) * .05;
+    u.pitch = p.pitch + (s.endsWith('?') ? .07 : 0) + (Math.random() - .5) * .05;
+    if(i === 0) u.onstart = () => { if(id === spk) setState('talk'); };
+    if(i === parts.length - 1){ u.onend = u.onerror = () => { if(id === spk) finish(); }; }
+    speechSynthesis.speak(u);
+  });
+}
+function stopSpeak(){ spk++; if('speechSynthesis' in window) speechSynthesis.cancel(); }
+
+/* Mesaj Yönetimi */
+const esc = t => t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+const fmt = t => esc(t).replace(/\*\*(.+?)\*\*/g,'<b>$1</b>').replace(/\n/g,'<br>');
+
+function addMe(t){
+  const d = document.createElement('div'); d.className = 'm me'; d.textContent = t;
+  chat.appendChild(d); chat.scrollTop = chat.scrollHeight;
+  if(voiceMode) $('cap').innerHTML = '<b>' + esc(t) + '</b>';
+}
+
+function addAi(t, o = {}, quiet){
+  const d = document.createElement('div'); d.className = 'm ai';
+  let x = `<span class="nm">PICA</span>` + fmt(t);
+  if(o.code) x += `<br><code class="pw">${esc(o.code)}</code><br><button class="cp" onclick="copyTxt(this.previousElementSibling.previousElementSibling.textContent,this)">Kopyala</button>`;
+  if(o.pre) x += `<pre><code>${esc(o.pre)}</code></pre><button class="cp" onclick="copyTxt(this.previousElementSibling.innerText,this)">Kopyala</button>`;
+  if(o.links) x += '<br>' + o.links.map(l => `<a class="btn ${l.alt ? 'alt' : ''}" target="_blank" rel="noopener" href="${l.u}">${l.t}</a>`).join('');
+  d.innerHTML = x; chat.appendChild(d); chat.scrollTop = chat.scrollHeight;
+  if(voiceMode){ $('cap').innerHTML += fmt(t); if(o.links) pendingEnd = true; }
+  if(!quiet) speak(t);
+}
+
+function reply(t, o){
+  const d = document.createElement('div'); d.className = 'm ai dots';
+  d.innerHTML = '<span></span><span></span><span></span>';
+  chat.appendChild(d); chat.scrollTop = chat.scrollHeight; setState('think');
+  setTimeout(() => { d.remove(); addAi(t, o); }, 400 + Math.min(t.length * 5, 800));
+}
+
+function copyTxt(t, b){ navigator.clipboard && navigator.clipboard.writeText(t).catch(()=>{}); b.textContent = 'Kopyalandı'; setTimeout(() => b.textContent = 'Kopyala', 1800); }
+
+/* Eylemler ve Yanıt Motoru */
+const WA = 'https://api.whatsapp.com/send?text=' + encodeURIComponent('Selam! Pica üzerinden yazıyorum, nasılsın?');
+function doWa(){ reply('Tamam, WhatsApp hazır. Aşağıdaki butona dokunup kişini seçebilirsin.', {links:[{t:"WhatsApp'ı Aç", u:WA},{t:'WhatsApp Web', u:'https://web.whatsapp.com/', alt:1}]}); }
+function doCall(){ reply('Elbette. Normal arama mı yapalım, yoksa WhatsApp üzerinden mi?', {links:[{t:'Telefonu Aç', u:'tel:'},{t:'WhatsApp', u:'https://wa.me/', alt:1}]}); }
+function doPass(){ const c = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789!@#$%&*', a = new Uint32Array(16); crypto.getRandomValues(a); reply('Senin için güvenli bir şifre hazırladım:', {code:[...a].map(n => c[n % c.length]).join('')}); }
+
+const pick = a => a[Math.floor(Math.random() * a.length)];
+const jokes = ['İki bilgisayar karşılaşmış. Biri demiş ki: "Sende virüs var galiba?" Diğeri: "Yok canım, sadece güncellemeyi sindiriyorum."', 'Yazılımcı neden hep karanlıkta çalışır? Çünkü ışık hata ayıklamayı bozuyor.'];
+const riddles = ['Elektrikle beslenirim, bilgiyle büyürüm, uzaktaki insanı yanına getiririm. Ben neyim? (Cevap: Cep telefonu)', 'Gözüm yok ama görürüm, hafızam var ama unutmam. Ben neyim? (Cevap: Kamera)'];
+
+function handle(raw){
+  const t = raw.trim(); if(!t) return;
+  stopSpeak(); addMe(t); inp.value = '';
+  const s = t.toLocaleLowerCase('tr'), w = s.split(/[^a-zçğıöşü0-9]+/);
+  const has = (...k) => k.some(x => w.includes(x)), inc = (...k) => k.some(x => s.includes(x));
+
+  if(inc('whatsapp', 'mesaj at', 'mesaj gönder') || has('wp')) return doWa();
+  if(has('ara', 'alo') || inc('arama yap', 'telefon aç', 'çağrı')) return doCall();
+  if(inc('şifre üret', 'şifre oluştur', 'şifre ver', 'şifre')) return doPass();
+  if(has('selam', 'merhaba', 'naber', 'nasılsın', 'sa')) return reply(pick(['Merhaba! Bugün nasıl gidiyor? Sana nasıl yardımcı olabilirim?', 'Selam! Seni görmek harika. Ne konuşmak istersin?']));
+  if(inc('espri', 'şaka', 'güldür')) return reply('Hadi bir tane geliyor: ' + pick(jokes));
+  if(inc('bilmece', 'bulmaca')) return reply('Düşün bakalım: ' + pick(riddles));
+  if(inc('oyun')) return reply('Oyunlarda kazanmanın en önemli kuralı sakin kalmak ve harita takibi yapmaktır! Hangi oyunu oynuyorsun?');
+  if(inc('donanım', 'ekran kartı', 'pc')) return reply('Yeni bir sistem topluyorsan işlemci ve ekran kartı dengesine dikkat etmelisin. Bütçen ne kadar?');
+  if(inc('adın ne', 'kimsin')) return reply('Ben PICA, senin kişisel sesli asistanınım.');
+
+  reply(pick(['Seni dinliyorum, biraz daha anlatır mısın?', 'Bu konuda sana katılıyorum. Başka neler eklemek istersin?', 'Harika bir fikir! Detayları konuşalım mı?']));
+}
+
+/* Ses Tanıma (Mikrofon) */
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+function vListen(){ if(!voiceMode || !rec || busy) return; try{ rec.start(); }catch(e){} }
+
+if(SR){
+  rec = new SR(); rec.lang = 'tr-TR'; rec.interimResults = false;
+  rec.onstart = () => { listening = true; $('mic').classList.add('on'); if(voiceMode || !busy) setState('listen'); };
+  rec.onresult = e => { busy = true; handle(e.results[0][0].transcript); };
+  rec.onerror = () => { endVoice(); };
+  rec.onend = () => { listening = false; $('mic').classList.remove('on'); if(!busy && document.body.dataset.s === 'listen') setState('idle'); if(voiceMode && !busy) setTimeout(vListen, 300); };$('mic').onclick = () => { stopSpeak(); listening ? rec.stop() : (busy = false, rec.start()); };
+} else {
+  $('mic').onclick = () => addAi('Cihazınızın tarayıcısı sesli tanımayı desteklemiyor.', {}, 1);
+}
+
+function startVoice(){
+  if(!rec){ addAi('Sesli sohbet bu tarayıcıda desteklenmiyor.', {}, 1); return; }
+  voiceMode = true; busy = false; pendingEnd = false; $('cap').innerHTML = '';$('ov').classList.add('on'); setVoiceUI();
+  const g = cur().hi.split('.')[0] + '. Seni dinliyorum.'; $('cap').innerHTML = fmt(g); busy = true; speak(g);
+}
+function endVoice(){ voiceMode = false; busy = false; stopSpeak(); try{ rec && rec.abort(); }catch(e){} $('ov').classList.remove('on'); setState('idle'); }
+
+$('vc').onclick = startVoice; $('endv').onclick = endVoice;
+$('bigorb').onclick = () => { stopSpeak(); busy = false; try{ rec.abort(); }catch(e){} setTimeout(vListen, 200); };
+
+/* Kısayol Çipleri */
+const chips = [
+  ['WhatsApp', doWa, 1], ['Ara', doCall, 1], ['Espri', 'Bana bir espri yap'],
+  ['Bilmece', 'Bir bilmece sor'], ['Şifre üret', doPass, 1],
+  ['Oyun', 'Oyun taktiği ver'], ['Donanım', 'Bilgisayar donanımı']
+];
+chips.forEach(c => {
+  const b = document.createElement('button'); b.className = 'chip'; b.textContent = c[0];
+  b.onclick = () => { if(c[2]){ addMe(c[0]); c[1](); } else handle(c[1]); };
+  $('chips').appendChild(b);
+});
+
+$('send').onclick = () => handle(inp.value);
+inp.addEventListener('keydown', e => { if(e.key === 'Enter') handle(inp.value); });
+
+// Açılış Mesajı
+addAi('Merhaba, ben PICA! Seni dinlemeye hazırım. Aşağıdaki mikrofon veya "Sesli Sohbet" butonuna dokunarak konuşabilirsin.', {}, 1);
+</script>
+</body>
+</html>
